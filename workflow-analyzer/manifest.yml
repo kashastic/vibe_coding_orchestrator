@@ -1,0 +1,23 @@
+modules:
+  jira:adminPage:
+    - key: workflow-analyzer-admin
+      resource: main
+      resolver:
+        function: resolver
+      title: Workflow Analyzer
+  function:
+    - key: resolver
+      handler: resolvers/index.handler
+resources:
+  - key: main
+    path: static/main
+permissions:
+  scopes:
+    - read:jira-work
+    - manage:jira-configuration
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/6b6f63e3-2223-4920-8173-2ba76841450e

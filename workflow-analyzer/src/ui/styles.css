@@ -1,0 +1,83 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(0, 82, 204, 0.12), transparent 45%),
+    linear-gradient(180deg, #f7faff 0%, #eef3fb 100%);
+  color: #172b4d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.hero {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0c66e4;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1;
+}
+
+.subtitle {
+  max-width: 680px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #44546f;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.nav-grid a {
+  padding: 14px 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #172b4d;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(9, 30, 66, 0.08);
+  box-shadow: 0 12px 32px rgba(9, 30, 66, 0.08);
+}
+
+.panel {
+  padding: 24px;
+  margin-bottom: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(9, 30, 66, 0.08);
+  box-shadow: 0 20px 45px rgba(9, 30, 66, 0.08);
+}
+
+.panel h2 {
+  margin-top: 0;
+}

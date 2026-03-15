@@ -15,8 +15,8 @@
 **Language:** TypeScript + React  
 **Storage:** Forge Storage API (key-value, ~10MB limit)  
 **Data Source:** Jira Cloud REST API v3  
-**Repo:** `C:\ClaudeWorkspace\JIRA_workflow_project\`  
-**App Root:** `workflow-analyzer/`
+**Repo:** `C:\ClaudeWorkspace\JIRA_workflow_project\workflow-analyzer\`
+**App Root:** `workflow-analyzer/` (this directory)
 
 ---
 
@@ -49,25 +49,25 @@ Build a Jira Cloud Forge application that analyzes Jira workflows and produces a
 ## Repository Layout
 
 ```text
-C:\ClaudeWorkspace\JIRA_workflow_project\
+C:\ClaudeWorkspace\JIRA_workflow_project\workflow-analyzer\   ← REPO_PATH
 |-- claude.md
 |-- rolling_handoff.md
+|-- task_plan.md
 |-- architecture.md
 |-- data_model.md
 |-- analysis_algorithms.md
 |-- repo_structure.md
 |-- implementation_rules.md
-|-- task_plan.md
-`-- workflow-analyzer\
-    |-- manifest.yml
-    |-- package.json
-    |-- tsconfig.json
-    |-- src\
-    |   |-- resolvers\
-    |   |-- algorithms\
-    |   |-- ui\
-    |   `-- types\
-    `-- static\
+|-- vision.md
+|-- manifest.yml
+|-- package.json
+|-- tsconfig.json
+|-- src\
+|   |-- resolvers\
+|   |-- algorithms\
+|   |-- ui\
+|   `-- types\
+`-- static\
 ```
 
 ---
@@ -138,30 +138,6 @@ C:\ClaudeWorkspace\JIRA_workflow_project\
 - Confirm Jira workflow search pagination behavior when `total=0` or a single page contains the full result
 - Finalize health grade color palette
 - Confirm Forge deployment behavior from this repository in non-TTY environments if a fresh bootstrap or deploy path is needed again
-
----
-
-## Orchestrator State
-
-The local orchestrator under `orchestrator/` is now part of the project control plane.
-
-Current orchestrator capabilities:
-
-- queries Notion via the database endpoint, not the data source endpoint
-- reconciles non-`Todo` Notion task states against local repository artifacts on each run
-- validates expected `Repo Path` artifacts before marking tasks `Done`
-- supports `Todo`, `Doing`, `Done`, `Blocked`, `Failed`, and `Waiting on Human`
-- blocks and unblocks downstream dependent tasks automatically
-- sends `ntfy` notifications for task lifecycle and blocker events
-- runs Codex non-interactively by default via `codex --dangerously-bypass-approvals-and-sandbox exec -`
-- can launch a separate interactive Codex terminal with `--interactive-on-blocker`
-- retries the same task after the interactive blocker session exits
-- prepares Claude handoff files under `orchestrator/handoffs/` for tasks assigned to `Claude`
-
-Important operational rule:
-
-- interactive Codex handoff is intended to resolve only the blocker and then return control to the orchestrator
-- the orchestrator, not the interactive child session, is supposed to remain the source of truth for Notion updates and notifications
 
 ---
 
