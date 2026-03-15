@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass
 from typing import Any
 from urllib import error, request
+
+_RATE_LIMIT_MAX_RETRIES = 3
 
 
 class NotionAPIError(RuntimeError):
@@ -38,43 +41,97 @@ class NotionClient:
         self._base_url = "https://api.notion.com/v1"
 
     def query_next_tasks(self) -> list[Task]:
-        payload = {
-            "filter": {
-                "and": [
+        return self._query_tasks(
+            {
+                "filter": {
+                    "and": [
+                        {
+                            "property": "Assigned Agent",
+                            "select": {
+                                "equals": "Codex",
+                            },
+                        },
+                        {
+                            "or": [
+                                {
+                                    "property": "Status",
+                                    "select": {
+                                        "equals": "Todo",
+                                    },
+                                },
+                                {
+                                    "property": "Status",
+                                    "select": {
+                                        "equals": "Waiting on Human",
+                                    },
+                                },
+                                {
+                                    "property": "Status",
+                                    "select": {
+                                        "is_empty": True,
+                                    },
+                                },
+                            ],
+                        },
+                    ]
+                },
+                "sorts": [
+                    {"property": "Milestone", "direction": "ascending"},
+                    {"property": "Priority", "direction": "descending"},
+                ],
+                "page_size": 20,
+            }
+        )
+
+    def query_codex_tasks(self) -> list[Task]:
+        return self.query_tasks_for_agents(("Codex",))
+
+    def query_tasks_for_agents(self, agent_names: tuple[str, ...]) -> list[Task]:
+        if not agent_names:
+            return []
+        if len(agent_names) == 1:
+            filter_payload: dict[str, Any] = {
+                "property": "Assigned Agent",
+                "select": {
+                    "equals": agent_names[0],
+                },
+            }
+        else:
+            filter_payload = {
+                "or": [
                     {
                         "property": "Assigned Agent",
                         "select": {
-                            "equals": "Codex",
+                            "equals": agent_name,
                         },
-                    },
-                    {
-                        "or": [
-                            {
-                                "property": "Status",
-                                "select": {
-                                    "equals": "Todo",
-                                },
-                            },
-                            {
-                                "property": "Status",
-                                "select": {
-                                    "is_empty": True,
-                                },
-                            },
-                        ],
-                    },
+                    }
+                    for agent_name in agent_names
                 ]
-            },
-            "sorts": [
-                {"property": "Milestone", "direction": "ascending"},
-                {"property": "Priority", "direction": "descending"},
-            ],
-            "page_size": 20,
-        }
-        data = self._request_json(
-            "POST", f"/data_sources/{self._database_id}/query", payload
+            }
+        return self._query_tasks(
+            {
+                "filter": filter_payload,
+                "page_size": 100,
+            }
         )
-        return [self._parse_task(item) for item in data.get("results", [])]
+
+    def _query_tasks(self, payload: dict[str, Any]) -> list[Task]:
+        results: list[Task] = []
+        next_cursor: str | None = None
+        while True:
+            current_payload = dict(payload)
+            if next_cursor is not None:
+                current_payload["start_cursor"] = next_cursor
+            data = self._request_json(
+                "POST", f"/databases/{self._database_id}/query", current_payload
+            )
+            results.extend(self._parse_task(item) for item in data.get("results", []))
+            if not data.get("has_more"):
+                break
+            next_cursor = data.get("next_cursor")
+            if not next_cursor:
+                break
+        return results
 
     def get_page(self, page_id: str) -> Task:
         data = self._request_json("GET", f"/pages/{page_id}")
@@ -88,10 +145,21 @@ class NotionClient:
         page = self.get_page(page_id)
         existing_notes = page.notes.strip()
         next_notes = f"{existing_notes}\n{note}".strip() if existing_notes else note
-        payload = {"properties": {"Notes": {"rich_text": [_text_block(next_notes)]}}}
+        payload = {"properties": {"Notes": {"rich_text": _make_text_blocks(next_notes)}}}
         self._request_json("PATCH", f"/pages/{page_id}", payload)
 
-    def _request_json(self, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    def set_note(self, page_id: str, note: str) -> None:
+        payload = {"properties": {"Notes": {"rich_text": _make_text_blocks(note)}}}
+        self._request_json("PATCH", f"/pages/{page_id}", payload)
+
+    def _request_json(
+        self,
+        method: str,
+        path: str,
+        payload: dict[str, Any] | None = None,
+        *,
+        _retries_left: int = _RATE_LIMIT_MAX_RETRIES,
+    ) -> dict[str, Any]:
         body = None
         if payload is not None:
             body = json.dumps(payload).encode("utf-8")
@@ -111,7 +179,21 @@ class NotionClient:
             with request.urlopen(req, timeout=30) as response:
                 return json.loads(response.read().decode("utf-8"))
         except error.HTTPError as exc:
+            if exc.code == 429 and _retries_left > 0:
+                try:
+                    retry_after = int(exc.headers.get("Retry-After", "1"))
+                except (TypeError, ValueError):
+                    retry_after = 1
+                time.sleep(max(retry_after, 1))
+                return self._request_json(method, path, payload, _retries_left=_retries_left - 1)
             details = exc.read().decode("utf-8", errors="replace")
+            if exc.code == 404:
+                raise NotionAPIError(
+                    "Notion API returned 404 for "
+                    f"{method} {path}. Verify that NOTION_DATABASE_ID is the database ID "
+                    "from the Notion database URL and that the database has been shared "
+                    "with your integration."
+                ) from exc
             raise NotionAPIError(
                 f"Notion API {method} {path} failed with {exc.code}: {details}"
             ) from exc
@@ -141,6 +223,9 @@ class NotionClient:
         )
 
 
+_NOTION_BLOCK_LIMIT = 2000
+
+
 def _text_block(content: str) -> dict[str, Any]:
     return {
         "type": "text",
@@ -148,6 +233,16 @@ def _text_block(content: str) -> dict[str, Any]:
             "content": content,
         },
     }
+
+
+def _make_text_blocks(content: str) -> list[dict[str, Any]]:
+    """Split content into chunks that respect Notion's 2000-character per block limit."""
+    if not content:
+        return []
+    return [
+        _text_block(content[i : i + _NOTION_BLOCK_LIMIT])
+        for i in range(0, len(content), _NOTION_BLOCK_LIMIT)
+    ]
 
 
 def _extract_title(properties: dict[str, Any], name: str) -> str:
@@ -181,4 +276,3 @@ def _extract_task_id(title: str) -> str:
         return title
     maybe_id = title.split(" ", 1)[0].strip()
     return maybe_id
-

@@ -15,6 +15,9 @@ class Config:
     run_log_path: Path
     codex_command: str = "codex"
     notion_version: str = "2022-06-28"
+    context_files: tuple[str, ...] = ("claude.md", "rolling_handoff.md", "task_plan.md")
+    loop_sleep_seconds: float = 2.0
+    codex_timeout_seconds: int | None = None
 
 
 def load_config() -> Config:
@@ -38,11 +41,29 @@ def load_config() -> Config:
     if not repo_path.is_dir():
         raise ValueError(f"REPO_PATH is not a directory: {repo_path}")
 
-    required_files = ("claude.md", "rolling_handoff.md", "task_plan.md")
-    missing_files = [name for name in required_files if not (repo_path / name).exists()]
+    context_files_raw = os.getenv(
+        "ORCHESTRATOR_CONTEXT_FILES", "claude.md,rolling_handoff.md,task_plan.md"
+    )
+    context_files = tuple(f.strip() for f in context_files_raw.split(",") if f.strip())
+
+    missing_files = [name for name in context_files if not (repo_path / name).exists()]
     if missing_files:
         missing_text = ", ".join(missing_files)
-        raise ValueError(f"REPO_PATH is missing required files: {missing_text}")
+        raise ValueError(f"REPO_PATH is missing required context files: {missing_text}")
+
+    loop_sleep_raw = os.getenv("ORCHESTRATOR_LOOP_SLEEP_SECONDS", "2.0")
+    try:
+        loop_sleep_seconds = float(loop_sleep_raw)
+    except ValueError:
+        loop_sleep_seconds = 2.0
+
+    codex_timeout_raw = os.getenv("CODEX_TIMEOUT_SECONDS", "")
+    codex_timeout_seconds: int | None = None
+    if codex_timeout_raw.strip():
+        try:
+            codex_timeout_seconds = int(codex_timeout_raw)
+        except ValueError:
+            pass
 
     log_dir = repo_path / "orchestrator" / "logs"
 
@@ -55,4 +76,7 @@ def load_config() -> Config:
         run_log_path=log_dir / "runs.jsonl",
         codex_command=os.getenv("CODEX_COMMAND", "codex"),
         notion_version=os.getenv("NOTION_VERSION", "2022-06-28"),
+        context_files=context_files,
+        loop_sleep_seconds=loop_sleep_seconds,
+        codex_timeout_seconds=codex_timeout_seconds,
     )

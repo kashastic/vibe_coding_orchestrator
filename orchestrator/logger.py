@@ -4,7 +4,6 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 
 @dataclass(frozen=True)
@@ -23,6 +22,7 @@ class RunLogger:
     def __init__(self, log_dir: Path, run_log_path: Path) -> None:
         self._log_dir = log_dir
         self._run_log_path = run_log_path
+        self._orchestrator_log_path = self._log_dir / "orchestrator.log"
         self._log_dir.mkdir(parents=True, exist_ok=True)
         self._run_log_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -33,6 +33,26 @@ class RunLogger:
     def append_run(self, record: RunRecord) -> None:
         with self._run_log_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(asdict(record)) + "\n")
+
+    def log_event(
+        self,
+        *,
+        task_id: str,
+        command: str | None,
+        message: str,
+        error_output: str | None = None,
+    ) -> None:
+        lines = [
+            f"[{self.now_iso()}] task_id={task_id}",
+            f"message={message}",
+        ]
+        if command:
+            lines.append(f"command={command}")
+        if error_output:
+            lines.append("error_output=")
+            lines.append(error_output.rstrip())
+        with self._orchestrator_log_path.open("a", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n\n")
 
     @staticmethod
     def now_iso() -> str:
@@ -59,4 +79,3 @@ class RunLogger:
             log_path=str(log_path) if log_path else None,
             error=error,
         )
-

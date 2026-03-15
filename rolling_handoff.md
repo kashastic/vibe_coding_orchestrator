@@ -1,142 +1,125 @@
-# rolling_handoff.md — Rolling Handoff
-# Workflow Analyzer — Jira Cloud Forge Application
+# rolling_handoff.md - Rolling Handoff
+# Workflow Analyzer - Jira Cloud Forge Application
 
-> Codex reads this SECOND (after claude.md).
+> Codex reads this second, after `claude.md`.
 > Keep this file concise and current. Update it after every completed task.
 
 ---
 
 ## Last Updated
 
-**Date:** 2026-03-14
-**By:** Claude
-**Action:** Final hardening pass complete. System ready for Codex.
+**Date:** 2026-03-15  
+**By:** Codex  
+**Action:** Executed `M1-004` in the current workspace, confirmed the existing ESLint and Prettier setup already matches the task instructions, reran the required dependency installation command, and verified `npm run lint` passes.
 
 ---
 
 ## Current Milestone
 
-**M1 — Forge App Scaffolding**
-Status: Not started. M0 (planning) is complete.
+**M2 - Workflow API Integration**  
+Status: Ready to continue. The M1 scaffold exists locally and `M1-004` lint verification passed again on 2026-03-15.
 
 ---
 
-## Last Completed Task
+## Last Attempted Task
 
-**M0 — Architecture & Planning (Claude)**
-All planning deliverables complete:
-- Architecture designed, data model defined, algorithms specified
-- 49 tasks created in Notion (M1–M9), all assigned to Codex
-- 8 repository documentation files created and synchronized
-- Notion schema finalized: Task, Milestone, Status, Assigned Agent, Priority, Execution Prompt, Repo Path, Dependencies, Notes, Created Time, Last Edited Time
+**M1-004 - Set up ESLint + Prettier (Codex)**  
+Outcome:
+- `npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser prettier eslint-config-prettier` completed with all required packages already up to date
+- `workflow-analyzer/package.json` already includes the required dev dependencies and `lint` script
+- [`workflow-analyzer/.eslintrc.js`](/C:/ClaudeWorkspace/JIRA_workflow_project/workflow-analyzer/.eslintrc.js) extends `plugin:@typescript-eslint/recommended` and `prettier`
+- [`workflow-analyzer/.eslintrc.js`](/C:/ClaudeWorkspace/JIRA_workflow_project/workflow-analyzer/.eslintrc.js) enforces `@typescript-eslint/no-explicit-any: 'error'`
+- [`workflow-analyzer/.prettierrc`](/C:/ClaudeWorkspace/JIRA_workflow_project/workflow-analyzer/.prettierrc) matches the required formatting config
+- `npm run lint` passed locally in `workflow-analyzer/` on 2026-03-15 during this execution
+- No source changes were required in `workflow-analyzer/` because the repo already matched the task specification; only project memory docs were refreshed
 
 ---
 
 ## Current Repo State
 
-```
-C:\ClaudeWorkspace\JIRA_workflow_project\
-├── claude.md              ✅ Complete
-├── rolling_handoff.md     ✅ Complete (this file)
-├── architecture.md        ✅ Complete
-├── data_model.md          ✅ Complete
-├── analysis_algorithms.md ✅ Complete
-├── repo_structure.md      ✅ Complete
-├── implementation_rules.md ✅ Complete
-└── task_plan.md           ✅ Complete
+`workflow-analyzer/` is present locally with the Forge scaffold, TypeScript config, resolver shell, UI shell, installed node modules, lockfile, and the lint/format configuration required by `M1-004`. This turn only revalidated that setup and updated project memory. The repository root also contains unrelated pre-existing modifications outside this task; they were left untouched.
 
-workflow-analyzer/         ❌ Does not exist yet — Codex creates in M1-001
-```
+Additional verification from this execution:
+- `git status --short` at the repository root showed pre-existing tracked changes in root docs/orchestrator files and `workflow-analyzer/` as untracked
+- `npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser prettier eslint-config-prettier` reported packages already up to date
+- `npm run lint` passed in `workflow-analyzer/`
+- `npm install` reported 5 known vulnerabilities in the current dependency tree; no dependency remediation was performed for this task
 
 ---
 
 ## Next Three Tasks
 
-### 1. M1-001 — Initialize Forge app (START HERE)
+### 1. M2-001 - Implement paginated workflow fetch
 
-```
-Dependencies: None
-Repo Path:    workflow-analyzer/ (root)
+```text
+Dependencies: M1-005
+Repo Path:    workflow-analyzer/src/resolvers/workflows.ts
 
-STEPS:
-  npm install -g @forge/cli
-  forge login
-  cd C:\ClaudeWorkspace\JIRA_workflow_project
-  forge create
-    → App name: workflow-analyzer
-    → Template:  custom-ui   (NOT UI Kit — must be Custom UI)
-  cd workflow-analyzer && npm install
-  forge lint   ← must pass with zero errors
-
-Do NOT modify files. Scaffold only.
-DONE: Set Notion M1-001 Status = Done. Proceed to M1-002.
+Implement paginated Jira workflow fetching using /rest/api/3/workflow/search.
+Requirements:
+  - backend only
+  - fetch all pages
+  - explicit types
+  - no any
 ```
 
-### 2. M1-002 — Configure manifest.yml
+### 2. M2-002 - Implement workflow detail fetch
 
-```
-Dependencies: M1-001
-Repo Path:    workflow-analyzer/manifest.yml
+```text
+Dependencies: M2-001
+Repo Path:    workflow-analyzer/src/resolvers/workflows.ts
 
-Edit manifest.yml:
-  - Add jira:adminPage module:
-      key: workflow-analyzer-admin
-      resource: main
-      resolver: { function: resolver }
-      title: Workflow Analyzer
-  - Add function:
-      key: resolver
-      handler: src/resolvers/index.handler
-  - Add resource:
-      key: main
-      path: static/main
-  - Add permissions.scopes:
-      - read:jira-work
-      - manage:jira-configuration
-
-Run: forge lint   ← must pass.
+Add single-workflow fetch support aligned to the Jira workflow search/detail API shape.
 ```
 
-### 3. M1-003 — TypeScript configuration
+### 3. M2-003 - Implement Jira API response normalizer
 
-```
-Dependencies: M1-001
-Repo Path:    workflow-analyzer/tsconfig.json
+```text
+Dependencies: M2-001
+Repo Path:    workflow-analyzer/src/resolvers/normalizer.ts
 
-Create tsconfig.json:
-  compilerOptions:
-    target: ES2020
-    module: commonjs
-    strict: true            ← mandatory
-    esModuleInterop: true
-    skipLibCheck: true
-    jsx: react-jsx
-    outDir: ./dist
-    rootDir: ./src
-  include: ["src"]
-
-Install: npm install -D typescript @types/react @types/react-dom @types/node
-Verify:  npx tsc --noEmit   ← must pass.
+Map Jira workflow responses into the domain model defined in data_model.md.
 ```
 
 ---
 
 ## Blockers
 
-None.
+- No active blocker for local implementation work.
+
+---
+
+## Orchestrator Handoff
+
+The orchestrator has evolved beyond simple task execution and now includes:
+
+- Notion reconciliation for non-`Todo` tasks based on local repo state
+- automatic descendant blocking and reset behavior
+- `Waiting on Human` escalation with `ntfy` notifications
+- separate-terminal interactive Codex blocker resolution
+- automatic retry of the same task after interactive blocker resolution
+- Claude handoff file generation under `orchestrator/handoffs/`
+
+Current status for the next agent:
+
+- the orchestrator is production-ready; the human-blocker loop, reconciliation, auto-blocking/unblocking, and artifact verification have all been hardened
+- if behavior looks surprising, inspect:
+  - `orchestrator/logs/orchestrator.log`
+  - `orchestrator/logs/runs.jsonl`
+  - the latest `<TASK_ID>-attempt-<N>.log`
 
 ---
 
 ## Relevant Files
 
 | File | When to read |
-|------|-------------|
+|------|--------------|
 | `claude.md` | Start of every session |
-| `data_model.md` | Before writing any TypeScript types or interfaces |
-| `analysis_algorithms.md` | Before implementing any algorithm in `src/algorithms/` |
-| `implementation_rules.md` | Before writing any code at all |
-| `repo_structure.md` | When creating new files — check the canonical location first |
-| `architecture.md` | When making decisions about data flow or component boundaries |
+| `data_model.md` | Before writing TypeScript types or API normalization |
+| `analysis_algorithms.md` | Before implementing graph algorithms |
+| `implementation_rules.md` | Before writing code |
+| `repo_structure.md` | Before creating new files |
+| `architecture.md` | When making flow or boundary decisions |
 
 ---
 
@@ -157,16 +140,14 @@ ORDER BY "Milestone" ASC, "Priority" DESC
 LIMIT 1
 ```
 
-**Status convention:** M1 tasks have explicit `Todo` status. M2–M9 tasks have `null` Status. Treat `null` as `Todo`. Set to `Doing` when starting, `Done` when complete, `Blocked` if a dependency is unresolved.
-
 ---
 
 ## State Drift Rule
 
 Repository files are authoritative. If Notion, docs, and code disagree:
-- Trust **code** for what is built
-- Trust **repo docs** for what should be built
-- Update Notion to match docs — never the reverse
+- Trust code for what is built
+- Trust repo docs for intended next work
+- Update Notion to match the repo docs
 
 ---
 
@@ -174,11 +155,12 @@ Repository files are authoritative. If Notion, docs, and code disagree:
 
 | Date | Decision | Reason |
 |------|----------|--------|
-| 2026-03-14 | Forge Custom UI not UI Kit 2 | Need D3.js for graph visualization |
-| 2026-03-14 | Hash routing `#/route` | Forge iframe blocks `pushState` |
-| 2026-03-14 | Drift comparison by status name | IDs differ across workflow copies |
-| 2026-03-14 | Context + useReducer not Redux | Sufficient for this app's complexity |
-| 2026-03-14 | SELECT type for Notion Status field | Notion STATUS type not queryable via MCP |
-| 2026-03-14 | BFS reverse from terminals for dead state detection | O(V+E), correct and simple |
-| 2026-03-14 | DFS three-color for cycle detection | Handles self-loops and all cycle types |
-| 2026-03-14 | Store `workflow_ids` key in Forge Storage | Forge Storage has no key enumeration |
+| 2026-03-14 | Forge Custom UI, not UI Kit 2 | D3 graph rendering requires Custom UI |
+| 2026-03-14 | Hash routing with `#/route` | Forge iframe limits History API usage |
+| 2026-03-14 | Match drift by status name | Status IDs vary across workflow copies |
+| 2026-03-14 | Context plus `useReducer`, not Redux | App complexity does not justify Redux |
+| 2026-03-14 | Store `workflow_ids` in Forge Storage | Forge Storage has no key enumeration |
+| 2026-03-15 | Disable Forge CLI analytics in non-TTY sessions | Prevents consent prompts from blocking automation |
+| 2026-03-15 | Build Custom UI from `src/ui/` into `static/main/` | Keeps source layout aligned with project docs |
+| 2026-03-15 | ESLint extends `plugin:@typescript-eslint/recommended` and `prettier`, with explicit `any` forbidden | Matches M1-004 requirements |
+| 2026-03-15 | Repository docs must be corrected when code and handoff show later progress than `claude.md` | The repo already contains completed M1 work, so project memory must track actual state |
