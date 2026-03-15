@@ -131,7 +131,7 @@ class NotionClient:
             next_cursor = data.get("next_cursor")
             if not next_cursor:
                 break
-        return results
+        return _resolve_text_dependencies(results)
 
     def get_page(self, page_id: str) -> Task:
         data = self._request_json("GET", f"/pages/{page_id}")
@@ -276,3 +276,40 @@ def _extract_task_id(title: str) -> str:
         return title
     maybe_id = title.split(" ", 1)[0].strip()
     return maybe_id
+
+
+def _resolve_text_dependencies(tasks: list[Task]) -> list[Task]:
+    """Resolve text-format dependency IDs to page IDs.
+
+    When the Notion Dependencies field is plain text (e.g. "M1-001, M2-003")
+    rather than a Relation property, _extract_relation_ids returns an empty
+    list.  This function reads the raw text value from raw_properties, parses
+    the comma-separated task IDs, and replaces dependency_ids with the
+    corresponding page IDs looked up from the task list itself.
+
+    Tasks that already have relation-based dependency_ids are left unchanged.
+    Text values that start with "none" or cannot be resolved are ignored.
+    """
+    from dataclasses import replace as dc_replace
+
+    by_task_id = {task.task_id: task.page_id for task in tasks}
+    resolved: list[Task] = []
+    for task in tasks:
+        if task.dependency_ids:
+            resolved.append(task)
+            continue
+        raw_text = _extract_rich_text(task.raw_properties, "Dependencies")
+        if not raw_text or raw_text.lower().startswith("none"):
+            resolved.append(task)
+            continue
+        dep_page_ids: list[str] = []
+        for part in raw_text.replace(";", ",").split(","):
+            dep_task_id = part.strip()
+            page_id = by_task_id.get(dep_task_id)
+            if page_id:
+                dep_page_ids.append(page_id)
+        if dep_page_ids:
+            resolved.append(dc_replace(task, dependency_ids=tuple(dep_page_ids)))
+        else:
+            resolved.append(task)
+    return resolved
