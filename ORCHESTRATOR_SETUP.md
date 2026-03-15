@@ -54,14 +54,17 @@ codex --version      # needs to print a version
 
 ### 3. Copy the orchestrator into your project
 
-Copy the `orchestrator/` folder from this repository into the root of any new project you want to automate.
+Copy the `orchestrator/` folder from this repository into the root of your new project. Create a subfolder named after your application — all app files go inside it.
 
 ```
-my-new-project/
-├── orchestrator/        ← copy this entire folder
-├── claude.md            ← Claude creates this
-├── rolling_handoff.md   ← Claude creates this
-└── task_plan.md         ← Claude creates this
+my-new-project/              ← REPO_PATH points here
+├── orchestrator/            ← copy this entire folder
+├── AppName/                 ← Claude creates this subfolder
+│   ├── claude.md            ← Claude creates this
+│   ├── rolling_handoff.md   ← Claude creates this
+│   ├── task_plan.md         ← Claude creates this
+│   └── src/                 ← all generated code goes here
+└── .env
 ```
 
 That folder is the entire engine. It requires nothing beyond Python's standard library.
@@ -102,7 +105,7 @@ REPO_PATH=C:\path\to\my-new-project
 
 # Optional
 CODEX_COMMAND=codex
-ORCHESTRATOR_CONTEXT_FILES=claude.md,rolling_handoff.md,task_plan.md
+ORCHESTRATOR_CONTEXT_FILES=AppName/claude.md,AppName/rolling_handoff.md,AppName/task_plan.md
 ORCHESTRATOR_LOOP_SLEEP_SECONDS=2.0
 # CODEX_TIMEOUT_SECONDS=1800
 ```

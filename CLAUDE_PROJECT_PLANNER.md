@@ -116,10 +116,10 @@ The orchestrator verifies this path exists on disk after Codex finishes. If the 
 
 | Situation | What to put in Repo Path |
 |---|---|
-| Task creates a single file | `src/auth/validator.ts` |
-| Task creates a folder with multiple files | `src/components/` |
-| Task creates multiple specific files | `src/types/user.ts, src/types/post.ts` |
-| Task modifies an existing file | the path to that file |
+| Task creates a single file | `AppName/src/auth/validator.ts` |
+| Task creates a folder with multiple files | `AppName/src/components/` |
+| Task creates multiple specific files | `AppName/src/types/user.ts, AppName/src/types/post.ts` |
+| Task modifies an existing file | the path to that file (including AppName/ prefix) |
 | Task is planning/architecture only | leave blank |
 | Task produces no file artifact | leave blank |
 
@@ -174,7 +174,7 @@ Create all tasks before linking dependencies, since you need the page IDs.
 
 ## Step 7 — Create the three context files in the repo
 
-These are written into the project root folder the user specified. Codex reads them at the start of every task to understand the project.
+These are written into the **application subfolder** (`AppName/`) inside the project root — not the project root itself. The subfolder name matches the application name. Codex reads them at the start of every task to understand the project.
 
 ### `claude.md`
 
@@ -345,7 +345,7 @@ After creating the Notion board and repo files, give the user:
 
 1. **The database URL** — so they can find it and get the ID
 2. **The database ID** — extracted from the URL (the hex string before `?v=`)
-3. **The `.env` file contents** — filled in with their API key placeholder, the real database ID, and the real repo path
+3. **The `.env` file contents** — filled in with their API key placeholder, the real database ID, the real repo path, and `ORCHESTRATOR_CONTEXT_FILES=AppName/claude.md,AppName/rolling_handoff.md,AppName/task_plan.md`
 4. **The exact command to run** — `python -m orchestrator.orchestrator --interactive-on-blocker`
 5. **A summary of what was created** — how many tasks, how many milestones, what order they run in
 
@@ -359,9 +359,9 @@ After creating the Notion board and repo files, give the user:
 - [ ] All tasks created with Title, Status=Todo, Assigned Agent, Milestone, Priority, Execution Prompt
 - [ ] All tasks that produce files have Repo Path filled in
 - [ ] All dependency links created
-- [ ] `claude.md` written to project root
-- [ ] `rolling_handoff.md` written to project root
-- [ ] `task_plan.md` written to project root
+- [ ] `AppName/claude.md` written to the application subfolder
+- [ ] `AppName/rolling_handoff.md` written to the application subfolder
+- [ ] `AppName/task_plan.md` written to the application subfolder
 - [ ] User has the database ID
 - [ ] User has the `.env` template with real values filled in
 - [ ] User knows the run command
