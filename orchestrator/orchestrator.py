@@ -485,15 +485,19 @@ def _blocker_detection_text(result) -> str:
     if result.error_message:
         return result.error_message.lower()
 
-    combined_output = result.combined_output or ""
-    if not combined_output:
+    stdout = (result.stdout or "").strip()
+    if stdout:
+        return stdout.lower()
+
+    stderr = (result.stderr or "").strip()
+    if not stderr:
         return ""
 
-    final_message = _extract_final_codex_message(combined_output)
+    final_message = _extract_final_codex_message(stderr)
     if final_message:
         return final_message.lower()
 
-    return combined_output.lower()
+    return stderr.lower()
 
 
 def _extract_final_codex_message(output: str) -> str:
