@@ -62,8 +62,8 @@ CODEX_COMMAND=codex
 NOTION_VERSION=2022-06-28
 
 # Comma-separated context files Codex reads at the start of every task.
-# Default: claude.md,rolling_handoff.md,task_plan.md
-ORCHESTRATOR_CONTEXT_FILES=claude.md,rolling_handoff.md,task_plan.md
+# Use AppName/ prefix to match the recommended project structure.
+ORCHESTRATOR_CONTEXT_FILES=AppName/claude.md,AppName/rolling_handoff.md,AppName/task_plan.md
 
 # Seconds to sleep between loop iterations. Default: 2.0
 ORCHESTRATOR_LOOP_SLEEP_SECONDS=2.0
