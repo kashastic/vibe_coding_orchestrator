@@ -8,7 +8,9 @@ An autonomous coding pipeline that uses **Notion as its task queue**, runs **Cod
 
 Building a complex project with AI agents usually means either babysitting a terminal or paying for expensive orchestration infrastructure. This is neither.
 
-You plan your project with Claude. You break it into tasks in Notion. You start the orchestrator. Codex picks up implementation tasks and runs them autonomously — retrying failures, validating outputs, cascading blockers through the dependency graph. When it hits something that needs judgement (a missing credential, a design decision, a complex architectural call), it generates a Claude handoff file, notifies you, and waits. You open Claude, resolve it, mark it done. The loop continues.
+You start by running the **[STARTER_PROMPT.md](STARTER_PROMPT.md)** in a Claude session opened at your project root. Claude asks you questions about what you want to build, then does the full project setup: creates the architecture document, sets up the file scaffold, and populates your Notion database with a complete task breakdown — milestones, dependencies, execution prompts, agent assignments, all of it.
+
+Then you start the orchestrator. Codex picks up implementation tasks and runs them autonomously — retrying failures, validating outputs, cascading blockers through the dependency graph. When it hits something that needs judgement (a missing credential, a design decision, a complex architectural call), it generates a Claude handoff file, notifies you, and waits. You open Claude, resolve it, mark it done. The loop continues.
 
 No cloud infra. No task queue server. No database beyond Notion. Just a Python process, a Notion API key, and your AI subscriptions.
 
@@ -65,6 +67,7 @@ vibe_coding_orchestrator/
 │   ├── logger.py              Per-attempt logs + runs.jsonl audit trail
 │   ├── handoffs/              Auto-generated Claude handoff files
 │   └── logs/                  Per-attempt Codex logs + runs.jsonl
+├── STARTER_PROMPT.md          Planning prompt — run this in Claude to set up a new project
 ├── .env.example
 ├── pyproject.toml
 └── README.md
@@ -145,14 +148,16 @@ Optional flag: `--interactive-on-blocker` launches an interactive Codex terminal
 ## Workflow
 
 ```
-1. Use Claude to plan the project → break into tasks → add to Notion
-2. python -m orchestrator
-3. Codex handles implementation tasks autonomously
-4. When Codex hits a blocker:
+1. Open Claude at your project root
+2. Paste STARTER_PROMPT.md — Claude asks questions, plans the project,
+   creates claude.md + file scaffold, populates Notion with all tasks
+3. python -m orchestrator
+4. Codex handles implementation tasks autonomously
+5. When Codex hits a blocker:
    → orchestrator generates handoff file, notifies you via ntfy.sh
    → you open Claude with the handoff, resolve it, mark task Done
-5. Orchestrator resumes automatically
-6. Repeat until done
+6. Orchestrator resumes automatically
+7. Repeat until done
 ```
 
 ---

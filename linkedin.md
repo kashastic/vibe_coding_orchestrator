@@ -12,9 +12,9 @@ I built an autonomous Codex orchestrator and open-sourced it. Total cost: under 
 
 **The workflow is this:**
 
-You open Claude at your project root and give it a prompt describing what you want to build. Claude asks you questions until it understands the scope. Then it creates a `claude.md` architecture plan, sets up the initial file structure, populates your Notion database with a full task breakdown (dependencies, agents, milestones), and tells you to launch the orchestrator.
+The repo includes a `STARTER_PROMPT.md`. You open Claude at your project root, paste the prompt, and Claude takes it from there — asks you clarifying questions about what you want to build, then creates the architecture document, sets up the file scaffold, and populates your Notion database with a complete task breakdown: milestones, dependencies, execution prompts, agent assignments.
 
-From that point, you step back. The orchestrator polls Notion, hands tasks to Codex one by one, validates each result, and handles everything that goes wrong. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
+Then you step back. The orchestrator polls Notion, hands tasks to Codex one by one, validates each result, and handles everything that goes wrong. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
 
 Here's what the orchestrator handles:
 
@@ -62,17 +62,15 @@ Here's everything — the full workflow from first prompt to finished project, a
 
 ---
 
-## How It Actually Starts: Claude Does the Planning
+## How It Actually Starts: The Starter Prompt
 
-Before the orchestrator runs a single task, Claude sets up the entire project.
+The repo includes a `STARTER_PROMPT.md`. Before the orchestrator runs a single task, you paste it into a Claude session opened at your project root.
 
-You open Claude at your project root and give it a prompt — something like "I want to build X, here are the constraints." Claude then asks you a series of clarifying questions: What's the target platform? What's already in place? What are the hard requirements versus nice-to-haves? What integrations are needed?
-
-Once it has enough, Claude does four things:
+Claude starts by asking five core questions: what you want to build, who it's for, what v1 looks like, any hard constraints, and tech preferences. Based on your answers it asks follow-up questions — iteratively, until it's confident enough to plan. Once it has what it needs, it does four things:
 
 1. **Creates `claude.md`** — the architecture document. Technology choices, file structure, module responsibilities, design decisions. This is the document every Codex run will read first to stay oriented.
 2. **Creates `rolling_handoff.md` and `task_plan.md`** — living documents that track what's been done, what's in progress, and what's coming next. Updated by Codex after every task.
-3. **Populates Notion** — a full task breakdown. Each task gets an execution prompt, an expected output path, an assigned agent (Codex or Claude), a milestone, a priority, and its dependencies. The full dependency graph is set up before anything runs.
+3. **Populates Notion directly via MCP** — a full task breakdown. Each task gets an execution prompt, an expected output path, an assigned agent (Codex or Claude), a milestone, a priority, and its dependencies. The full dependency graph is set up before anything runs.
 4. **Sets up the initial file structure** — repo scaffold, config files, anything that needs to exist before Codex starts.
 
 Then you run `python -m orchestrator` and step back.
