@@ -1,0 +1,18 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Orchestrator runtime output
+orchestrator/logs/*.log
+orchestrator/logs/*.jsonl
+orchestrator/handoffs/*.md
+
+# Keep the directories themselves
+!orchestrator/logs/.gitkeep
+!orchestrator/handoffs/.gitkeep

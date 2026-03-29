@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "vibe-coding-orchestrator"
+version = "0.1.0"
+description = "Autonomous Codex orchestrator using Notion as the task queue"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+orchestrator = "orchestrator.orchestrator:main"
