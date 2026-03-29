@@ -11,7 +11,7 @@ from orchestrator.codex_runner import CodexRunner
 from orchestrator.config import load_config
 from orchestrator.logger import RunLogger
 from orchestrator.notion_client import NotionAPIError, NotionClient, Task
-from orchestrator.ntfy_notifier import NtfyNotifier
+from orchestrator.ntfy_notifier import NotificationError, NtfyNotifier
 from orchestrator.status_updater import StatusUpdater
 from orchestrator.task_selector import choose_next_task
 from orchestrator.task_reconciler import plan_reconciliation, task_artifact_exists
