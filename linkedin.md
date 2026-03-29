@@ -6,11 +6,17 @@
 
 ---
 
-I built an autonomous Codex orchestrator and open-sourced it. If you're using Notion as a task board and want to run Codex unattended, this might save you a lot of babysitting.
+I built an autonomous Codex orchestrator and open-sourced it. Total cost: under €40/month using Claude and Codex subscriptions you probably already have.
 
 **https://github.com/kashastic/vibe_coding_orchestrator**
 
-Here's what it does:
+**The workflow is this:**
+
+You open Claude at your project root and give it a prompt describing what you want to build. Claude asks you questions until it understands the scope. Then it creates a `claude.md` architecture plan, sets up the initial file structure, populates your Notion database with a full task breakdown (dependencies, agents, milestones), and tells you to launch the orchestrator.
+
+From that point, you step back. The orchestrator polls Notion, hands tasks to Codex one by one, validates each result, and handles everything that goes wrong. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
+
+Here's what the orchestrator handles:
 
 **Tasks live in Notion.** Each task has a status, an assigned agent (Codex or Claude), dependencies, and an expected output path in your repo. The orchestrator polls the database in a loop.
 
@@ -40,21 +46,40 @@ Autonomous agents are only useful if you can trust their state. That's what most
 
 ---
 
-# I Built an Autonomous Codex Orchestrator Using Notion as the Task Queue — Here's Exactly How It Works
+# Claude Plans, Codex Builds — I Built the Orchestrator That Connects Them
 
 Most agentic coding demos show the happy path: AI gets task, AI writes code, done.
 
-What they don't show is what happens when the task was marked Done but the file never got created. Or when the agent silently hangs on an auth error. Or when a dependency chain falls apart and you don't find out until three tasks downstream have already run on bad assumptions.
+What they don't show is who decides what the tasks are. Or what happens when a task is marked Done but the file never got created. Or when the agent silently hangs on an auth error. Or when a dependency chain falls apart and you don't find out until three tasks downstream have already run on bad assumptions.
 
-I built a Python orchestrator that handles all of this. It runs Codex unattended, manages task state in Notion, respects dependency chains, detects human blockers, and fires push notifications so I always know what's happening without watching a terminal.
+I built a Python orchestrator that handles the full lifecycle. Claude does the planning. Codex does the building. The orchestrator manages everything in between: task state in Notion, dependency chains, failure recovery, human blocker detection, and push notifications.
+
+Total cost: under €40/month using Claude and Codex subscriptions you probably already have.
 
 It's open source. **https://github.com/kashastic/vibe_coding_orchestrator**
 
-Here's everything — how it works, why it's designed the way it is, and what each file does.
+Here's everything — the full workflow from first prompt to finished project, and what each piece does.
 
 ---
 
-## The Core Idea
+## How It Actually Starts: Claude Does the Planning
+
+Before the orchestrator runs a single task, Claude sets up the entire project.
+
+You open Claude at your project root and give it a prompt — something like "I want to build X, here are the constraints." Claude then asks you a series of clarifying questions: What's the target platform? What's already in place? What are the hard requirements versus nice-to-haves? What integrations are needed?
+
+Once it has enough, Claude does four things:
+
+1. **Creates `claude.md`** — the architecture document. Technology choices, file structure, module responsibilities, design decisions. This is the document every Codex run will read first to stay oriented.
+2. **Creates `rolling_handoff.md` and `task_plan.md`** — living documents that track what's been done, what's in progress, and what's coming next. Updated by Codex after every task.
+3. **Populates Notion** — a full task breakdown. Each task gets an execution prompt, an expected output path, an assigned agent (Codex or Claude), a milestone, a priority, and its dependencies. The full dependency graph is set up before anything runs.
+4. **Sets up the initial file structure** — repo scaffold, config files, anything that needs to exist before Codex starts.
+
+Then you run `python -m orchestrator` and step back.
+
+---
+
+## The Orchestrator's Core Loop
 
 The orchestrator is a single Python process that runs a polling loop. Every iteration:
 
