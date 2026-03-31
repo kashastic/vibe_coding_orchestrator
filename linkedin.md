@@ -199,18 +199,9 @@ There's also an `--interactive-on-blocker` flag that launches an interactive Cod
 
 ## Claude Handoffs
 
-Not everything can be automated. Some tasks are assigned to Claude instead of Codex — typically architecture decisions, complex reasoning tasks, or anything that needs a human in the loop.
+By the time the orchestrator starts, all Claude work is already done. Architecture decisions, technology choices, task breakdown — everything happens during the planning session before the orchestrator ever runs. When you launch `python -m orchestrator`, every task in Notion is a Codex task.
 
-For Claude-assigned tasks whose dependencies are all Done, the orchestrator auto-generates a markdown handoff file at `orchestrator/handoffs/<task-id>-claude-handoff.md`. The file contains:
-
-- Task ID and title
-- Execution prompt
-- Repo path
-- Read order for context files
-- Repo root path
-- Any existing notes
-
-The task is then marked **Waiting on Human** and a push notification fires. A human picks up the handoff file and starts a Claude session with it.
+The handoff mechanism exists as a safety net: if a task was somehow left assigned to Claude when the orchestrator starts, it auto-generates a markdown file at `orchestrator/handoffs/<task-id>-claude-handoff.md` containing the task prompt, read order, repo path, and notes — marks it Waiting on Human and fires a push notification. But this should never happen in normal use. It's a guardrail, not a workflow.
 
 ---
 
