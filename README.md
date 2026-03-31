@@ -158,17 +158,22 @@ PHASE 1 — PLANNING (you + Claude)
 3. Claude asks questions, you answer — iteratively until the plan is solid
 4. Claude creates: claude.md, task_plan.md, rolling_handoff.md, file scaffold
 5. Claude populates Notion with every task (via Notion MCP)
-6. You review every task in Notion — edit, add, remove, refine with Claude
-7. Repeat until the task list is exactly right
+   — all tasks assigned to Codex, none to Claude
+6. You review every task — edit, split, add, remove, refine with Claude
+7. Confirm every task is Codex-assigned before continuing
 
 PHASE 2 — EXECUTION (orchestrator)
 8. python -m orchestrator
-9. Codex picks up tasks in dependency order and runs autonomously
+9. Codex runs all tasks in dependency order, autonomously
 10. When Codex hits a blocker (missing credential, required login, etc.):
     → orchestrator notifies you via ntfy.sh, marks task Waiting on Human
-    → you resolve it, mark task Done
-11. Orchestrator resumes automatically
-12. Repeat until all tasks are Done
+    → you resolve it, mark task Done, orchestrator resumes
+11. All tasks Done → orchestrator sends "All tasks completed" notification
+
+PHASE 3 — FINAL REVIEW (you + Claude)
+12. Open Claude, review the full codebase against claude.md
+13. Check rolling_handoff.md for a summary of every decision Codex made
+14. Fix anything that doesn't meet the architecture, add follow-up tasks if needed
 ```
 
 ---

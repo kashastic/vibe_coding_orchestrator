@@ -16,6 +16,8 @@ I built an autonomous Codex orchestrator and open-sourced it. Total cost: under 
 
 **Phase 2 — the orchestrator, once you're satisfied.** You run `python -m orchestrator` and step back. Codex picks up tasks in dependency order and runs them autonomously. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
 
+**Phase 3 — final review.** When the orchestrator finishes, you open Claude and review the full codebase against the architecture document. `rolling_handoff.md` gives you a complete record of every decision Codex made along the way. You fix anything that doesn't meet the standard, add follow-up tasks if needed, and run the orchestrator again.
+
 Here's what the orchestrator handles:
 
 **Tasks live in Notion.** Each task has a status, an assigned agent (Codex or Claude), dependencies, and an expected output path in your repo. The orchestrator polls the database in a loop.
@@ -78,6 +80,18 @@ Once it has what it needs, Claude does four things:
 **Then you review.** Go through every task in Notion. Edit prompts that are too vague. Split tasks that are too large. Add what's missing. Remove what's redundant. Work with Claude to refine anything that feels off. The orchestrator only runs once you're satisfied with the full list.
 
 Only then do you run `python -m orchestrator`.
+
+---
+
+## Phase 2: Execution — The Orchestrator Runs Codex
+
+`python -m orchestrator` and you step back. The orchestrator picks up Codex tasks in dependency order and runs them autonomously until all tasks are Done. When it hits something it can't resolve — a missing credential, a required login, an external approval — it marks the task Waiting on Human, blocks its descendants, and fires a push notification. You fix it, mark the task Done, and the loop resumes.
+
+---
+
+## Phase 3: Final Review — You and Claude Again
+
+When the orchestrator finishes, you open Claude and review the full codebase. `rolling_handoff.md` is your starting point — Codex appended a summary after every task it completed, so you have a full record of what was built and what decisions were made along the way. You review the output against `claude.md`, fix anything that doesn't meet the architecture, and add follow-up tasks for anything that needs iteration. Run the orchestrator again on the new tasks.
 
 ---
 

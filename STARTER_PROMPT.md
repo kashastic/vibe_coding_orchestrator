@@ -96,12 +96,11 @@ Every task must fit in a single Codex run without needing a large context window
 
 ### AGENT ASSIGNMENT RULES
 
-Almost all tasks should be assigned to **Codex**. Codex handles everything that is:
-- Pure implementation (write a file, implement a function, configure a tool)
-- Well-defined with a clear expected output path
-- Completable without a new decision being made
+**All tasks must be assigned to Codex.** Do not assign any task to Claude.
 
-Only assign **Claude** to a task if it genuinely cannot be decided now — for example, if the right approach depends on something that can only be known after earlier tasks complete and a human needs to evaluate the result. These should be rare. If you find yourself assigning many tasks to Claude, you haven't planned deeply enough — go back and make those decisions now.
+This planning session IS the Claude work. Every architecture decision, every ambiguity, every design choice — resolve it here, now, with the human. Write those decisions into claude.md. Then break the work into Codex tasks that can execute those decisions without needing to think.
+
+If you find yourself wanting to assign a task to Claude, that means you haven't made a decision that you should be making right now. Stop and make it.
 
 ---
 
@@ -152,7 +151,7 @@ When done: Append a brief summary of what you did and any decisions you made to 
 
 Once all files are created and all tasks are in Notion, give me:
 1. Total task count and milestone breakdown
-2. Any tasks assigned to Claude and the specific reason why they couldn't be decided now
+2. Confirm that every task is assigned to Codex — no Claude tasks
 3. Anything I should review or double-check before launching the orchestrator
 
 Stop here. Do not launch anything. The human reviews first.
@@ -160,18 +159,18 @@ Stop here. Do not launch anything. The human reviews first.
 
 ---
 
-## Phase 2: Review (you, before launching the orchestrator)
+## Phase 2: Review (you + Claude, before launching the orchestrator)
 
-Before running the orchestrator, go through Notion and:
+Before running the orchestrator, go through every task in Notion:
 
-- Read every task. Does the execution prompt make sense? Is it sized correctly?
-- Edit tasks that are too vague or too large
-- Add tasks that are missing
-- Remove tasks that are redundant
-- Reorder dependencies if needed
-- Work with Claude to refine anything that feels off
+- Read every execution prompt. Does it make sense? Is it specific enough for Codex to execute without guessing?
+- Check task sizing. If a task feels too large, split it.
+- Add tasks that are missing. Remove tasks that are redundant.
+- Reorder dependencies if anything is wrong.
+- Confirm that **every task is assigned to Codex**. If any task is assigned to Claude, complete it now in a Claude session and mark it Done — or rework it into a Codex task.
+- Work with Claude to refine anything that feels off.
 
-**Only launch the orchestrator once you are satisfied with the full task list.**
+**Only launch the orchestrator once every task is assigned to Codex and you are satisfied with the full list.**
 
 ---
 
@@ -181,4 +180,13 @@ Before running the orchestrator, go through Notion and:
 python -m orchestrator
 ```
 
-The orchestrator takes it from here. It executes Codex tasks in dependency order, validates each output, handles failures, and notifies you when something needs your attention.
+The orchestrator runs all Codex tasks in dependency order, autonomously. It notifies you via ntfy.sh when something needs your attention (a blocker, a missing credential) and when all tasks are complete.
+
+## Phase 4: Final Review (you + Claude)
+
+When the orchestrator finishes, open Claude and do a full code review:
+
+- Read `rolling_handoff.md` — Codex appended a summary after every task, so you have a complete record of what was built and what decisions were made
+- Review the output against `claude.md` — does the implementation match the architecture?
+- Fix anything that doesn't meet the standard
+- If follow-up tasks are needed, add them to Notion and run the orchestrator again
