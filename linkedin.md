@@ -10,11 +10,11 @@ I built an autonomous Codex orchestrator and open-sourced it. Total cost: under 
 
 **https://github.com/kashastic/vibe_coding_orchestrator**
 
-**The workflow is this:**
+**The workflow is two phases:**
 
-The repo includes a `STARTER_PROMPT.md`. You open Claude at your project root, paste the prompt, and Claude takes it from there — asks you clarifying questions about what you want to build, then creates the architecture document, sets up the file scaffold, and populates your Notion database with a complete task breakdown: milestones, dependencies, execution prompts, agent assignments.
+**Phase 1 — you and Claude, before the orchestrator ever starts.** The repo includes a `STARTER_PROMPT.md`. You open Claude at your project root, paste it, and Claude asks questions until it understands what you want to build. It makes every architecture decision with you upfront, then creates the architecture document, sets up the file scaffold, and populates your Notion database with a complete task breakdown. Then you review. Edit tasks, remove what doesn't fit, add what's missing, refine with Claude until the list is right.
 
-Then you step back. The orchestrator polls Notion, hands tasks to Codex one by one, validates each result, and handles everything that goes wrong. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
+**Phase 2 — the orchestrator, once you're satisfied.** You run `python -m orchestrator` and step back. Codex picks up tasks in dependency order and runs them autonomously. Claude planned it. Codex builds it. The orchestrator keeps them in sync.
 
 Here's what the orchestrator handles:
 
@@ -62,18 +62,22 @@ Here's everything — the full workflow from first prompt to finished project, a
 
 ---
 
-## How It Actually Starts: The Starter Prompt
+## Phase 1: Planning — You and Claude
 
-The repo includes a `STARTER_PROMPT.md`. Before the orchestrator runs a single task, you paste it into a Claude session opened at your project root.
+This is where all the real thinking happens. The orchestrator doesn't run yet.
 
-Claude starts by asking five core questions: what you want to build, who it's for, what v1 looks like, any hard constraints, and tech preferences. Based on your answers it asks follow-up questions — iteratively, until it's confident enough to plan. Once it has what it needs, it does four things:
+The repo includes a `STARTER_PROMPT.md`. You open Claude at your project root and paste it. Claude starts with five core questions: what you want to build, who it's for, what v1 looks like, hard constraints, tech preferences. Based on your answers it asks follow-up questions — iteratively, until it can make every decision confidently. This is a proper planning session, not a quick prompt. Every architecture choice that can be made now gets made now, so Codex doesn't have to figure it out mid-task.
 
-1. **Creates `claude.md`** — the architecture document. Technology choices, file structure, module responsibilities, design decisions. This is the document every Codex run will read first to stay oriented.
-2. **Creates `rolling_handoff.md` and `task_plan.md`** — living documents that track what's been done, what's in progress, and what's coming next. Updated by Codex after every task.
-3. **Populates Notion directly via MCP** — a full task breakdown. Each task gets an execution prompt, an expected output path, an assigned agent (Codex or Claude), a milestone, a priority, and its dependencies. The full dependency graph is set up before anything runs.
-4. **Sets up the initial file structure** — repo scaffold, config files, anything that needs to exist before Codex starts.
+Once it has what it needs, Claude does four things:
 
-Then you run `python -m orchestrator` and step back.
+1. **Creates `claude.md`** — the architecture document. Technology choices, file structure, module responsibilities, design decisions. Every Codex run reads this first to stay oriented.
+2. **Creates `task_plan.md` and `rolling_handoff.md`** — full milestone and task breakdown in readable form; and a living document Codex appends to after every completed task.
+3. **Populates Notion directly via MCP** — every task gets an execution prompt, expected output path, agent assignment (almost always Codex), milestone, priority, and dependencies. The full dependency graph is in place before anything runs.
+4. **Sets up the initial file scaffold** — empty files at every expected path so Codex has the full project picture from task one.
+
+**Then you review.** Go through every task in Notion. Edit prompts that are too vague. Split tasks that are too large. Add what's missing. Remove what's redundant. Work with Claude to refine anything that feels off. The orchestrator only runs once you're satisfied with the full list.
+
+Only then do you run `python -m orchestrator`.
 
 ---
 

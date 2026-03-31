@@ -8,9 +8,13 @@ An autonomous coding pipeline that uses **Notion as its task queue**, runs **Cod
 
 Building a complex project with AI agents usually means either babysitting a terminal or paying for expensive orchestration infrastructure. This is neither.
 
-You start by running the **[STARTER_PROMPT.md](STARTER_PROMPT.md)** in a Claude session opened at your project root. Claude asks you questions about what you want to build, then does the full project setup: creates the architecture document, sets up the file scaffold, and populates your Notion database with a complete task breakdown — milestones, dependencies, execution prompts, agent assignments, all of it.
+The workflow is two phases:
 
-Then you start the orchestrator. Codex picks up implementation tasks and runs them autonomously — retrying failures, validating outputs, cascading blockers through the dependency graph. When it hits something that needs judgement (a missing credential, a design decision, a complex architectural call), it generates a Claude handoff file, notifies you, and waits. You open Claude, resolve it, mark it done. The loop continues.
+**Phase 1 — Planning (you + Claude, before the orchestrator runs)**
+Use **[STARTER_PROMPT.md](STARTER_PROMPT.md)** to kick off a Claude session. Claude asks questions until it understands the project, then makes every architecture decision with you upfront: technology stack, file structure, module boundaries, task breakdown. It creates the architecture document, sets up the file scaffold, and populates your Notion database with every task — execution prompts, dependencies, milestones, all of it. Then you review. Edit tasks, add what's missing, remove what's redundant, refine with Claude until the task list is exactly right.
+
+**Phase 2 — Execution (orchestrator, once tasks are finalized)**
+Run `python -m orchestrator`. Codex picks up tasks in dependency order and runs them autonomously — retrying failures, validating output artifacts, cascading blockers through the dependency graph. When it hits something that needs human attention (a missing credential, a required login, an external approval), it notifies you via ntfy.sh and waits. You resolve it, mark the task done, and the loop continues.
 
 No cloud infra. No task queue server. No database beyond Notion. Just a Python process, a Notion API key, and your AI subscriptions.
 
@@ -148,16 +152,23 @@ Optional flag: `--interactive-on-blocker` launches an interactive Codex terminal
 ## Workflow
 
 ```
+PHASE 1 — PLANNING (you + Claude)
 1. Open Claude at your project root
-2. Paste STARTER_PROMPT.md — Claude asks questions, plans the project,
-   creates claude.md + file scaffold, populates Notion with all tasks
-3. python -m orchestrator
-4. Codex handles implementation tasks autonomously
-5. When Codex hits a blocker:
-   → orchestrator generates handoff file, notifies you via ntfy.sh
-   → you open Claude with the handoff, resolve it, mark task Done
-6. Orchestrator resumes automatically
-7. Repeat until done
+2. Paste STARTER_PROMPT.md
+3. Claude asks questions, you answer — iteratively until the plan is solid
+4. Claude creates: claude.md, task_plan.md, rolling_handoff.md, file scaffold
+5. Claude populates Notion with every task (via Notion MCP)
+6. You review every task in Notion — edit, add, remove, refine with Claude
+7. Repeat until the task list is exactly right
+
+PHASE 2 — EXECUTION (orchestrator)
+8. python -m orchestrator
+9. Codex picks up tasks in dependency order and runs autonomously
+10. When Codex hits a blocker (missing credential, required login, etc.):
+    → orchestrator notifies you via ntfy.sh, marks task Waiting on Human
+    → you resolve it, mark task Done
+11. Orchestrator resumes automatically
+12. Repeat until all tasks are Done
 ```
 
 ---
