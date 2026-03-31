@@ -6,7 +6,7 @@
 
 ---
 
-I built an autonomous Codex orchestrator and open-sourced it. Total cost: under €40/month using Claude and Codex subscriptions you probably already have.
+I built an autonomous Codex orchestrator and open-sourced it. Total cost: €40/month — Claude Pro at €20 and Codex at €20. Two base plans, best of both worlds, and you get your money's worth out of both.
 
 **https://github.com/kashastic/vibe_coding_orchestrator**
 
@@ -56,7 +56,7 @@ What they don't show is who decides what the tasks are. Or what happens when a t
 
 I built a Python orchestrator that handles the full lifecycle. Claude does the planning. Codex does the building. The orchestrator manages everything in between: task state in Notion, dependency chains, failure recovery, human blocker detection, and push notifications.
 
-Total cost: under €40/month using Claude and Codex subscriptions you probably already have.
+Total cost: €40/month flat. Claude Pro at €20, Codex at €20. Two base plans, best of both worlds.
 
 It's open source. **https://github.com/kashastic/vibe_coding_orchestrator**
 
@@ -301,6 +301,20 @@ Optional: `--interactive-on-blocker` to launch interactive Codex sessions when h
 Because I don't want to run one. The whole point is that this system has no moving parts beyond a Python process and two API keys. Notion is already where I manage tasks. Using it as the task queue means I can edit tasks, add dependencies, change priorities, and inspect state from any device — without any special tooling.
 
 The tradeoff is that Notion isn't built for this. It doesn't have atomic status transitions or guaranteed delivery. The reconciliation loop is what compensates for that: instead of relying on Notion as a source of truth, it treats Notion as a human-readable view and the filesystem as the ground truth.
+
+---
+
+## The Cost Breakdown
+
+| Tool | Plan | Cost |
+|---|---|---|
+| Claude Pro | Base plan | €20/month |
+| Codex | Base plan | €20/month |
+| Notion | Free tier | €0 |
+| ntfy.sh | Free | €0 |
+| **Total** | | **€40/month** |
+
+Claude Pro and Codex are each €20/month at their base plans. That's it. No cloud infra, no hosted queue, no database subscription. Two tools you're probably already paying for — this orchestrator just makes sure you get your money's worth out of both. Claude handles the thinking, Codex handles the building, and neither is sitting idle.
 
 ---
 
