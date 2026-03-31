@@ -271,6 +271,8 @@ orchestrator/
 
 ## Setup
 
+**A note on safety:** The orchestrator runs Codex with `--dangerously-bypass-approvals-and-sandbox`, which means it executes code without confirmation prompts. Run this on a machine or environment you're comfortable with — not on a production system or a machine with sensitive credentials you wouldn't want an automated process touching.
+
 **Requirements:**
 - Python 3.11+
 - Codex CLI v0.114+ (`npm install -g @openai/codex` or equivalent)
