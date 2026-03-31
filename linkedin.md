@@ -64,6 +64,10 @@ Here's everything — the full workflow from first prompt to finished project, a
 
 ---
 
+> Not AI instead of human. Not human instead of AI. Human on the loop — you set the direction, the agents do the work, and you stay in control of what matters.
+
+---
+
 ## Phase 1: Planning — You and Claude
 
 This is where all the real thinking happens. The orchestrator doesn't run yet.
