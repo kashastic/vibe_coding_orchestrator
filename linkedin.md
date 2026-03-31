@@ -91,7 +91,9 @@ Only then do you run `python -m orchestrator`.
 
 ## Phase 3: Final Review — You and Claude Again
 
-When the orchestrator finishes, you open Claude and review the full codebase. `rolling_handoff.md` is your starting point — Codex appended a summary after every task it completed, so you have a full record of what was built and what decisions were made along the way. You review the output against `claude.md`, fix anything that doesn't meet the architecture, and add follow-up tasks for anything that needs iteration. Run the orchestrator again on the new tasks.
+When the orchestrator finishes, you open Claude and review the full codebase. `rolling_handoff.md` is your starting point — Codex appended a summary after every task it completed, so you have a full record of what was built and what decisions were made along the way. You review the output against `claude.md`. If everything looks good, you're done.
+
+If the review surfaces issues or gaps, you add follow-up tasks to Notion and run the orchestrator again. Already-completed tasks are safely skipped — the orchestrator reconciles state against the filesystem on every startup, and any task whose output already exists on disk stays Done. Only the new tasks run.
 
 ---
 
